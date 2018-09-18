@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 '''
 This method is the collartz problem with an additional if statement that checks if the value of x has been executed
 previosly and halted.  It accepts the initial value x and a list of numbers that have already been checked.
@@ -44,10 +45,19 @@ def outer_loop_without_checking(n):
 
 if __name__ == '__main__':
 
-    count_checked = outer_loop_with_checking(1000)
-    print('with checking', count_checked)
+    #count_checked = outer_loop_with_checking(1000)
+    #print('with checking', count_checked)
 
-    count_not_checked = outer_loop_without_checking(10000)
-    print('without checking', count_not_checked)
+    #count_not_checked = outer_loop_without_checking(10000)
+    #print('without checking', count_not_checked)
+    empty_list = []
+    count_list = []
+    init_value_list = []
+    for i in range(100):
+        count = collartz(i+1, empty_list)
+        init_value_list.append(i+1)
+        count_list.append(count)
+    plt.scatter(init_value_list, count_list)
+    plt.show()
 
 
