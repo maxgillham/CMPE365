@@ -11,6 +11,8 @@ def recurse(list, sum_left, sum_right):
         sum_left.append(get_sum(list[0:divide_index]))
         sum_right.append(get_sum(list[divide_index:]))
         if divide_index != 0:
+            print('left', list[:divide_index])
+            print('right', list[divide_index:])
             recurse(list[:divide_index], sum_left, sum_right)
             recurse(list[divide_index:], sum_left, sum_right)
     return sum_left, sum_right
@@ -20,5 +22,6 @@ def get_sum(list):
 
 if __name__ == '__main__':
     test_list = [2, 4, 5, -1, 3, -6, 1, 4]
+    print('initial', test_list)
     sum_left, sum_right = question_1(test_list, 0, 8)
-    print(sum_left, sum_left)
+    
