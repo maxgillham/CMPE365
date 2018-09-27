@@ -6,12 +6,8 @@ Method for question 1.  Pass this method a list and the left and right indicies 
 return the maximum segment sum and corresponding segment.
 '''
 def question_1(list, left_index, right_index):
-    #set initial sum to be the sum of the entire list
-    initial_sum = sum(list[left_index:right_index+1])
-    #set initial sub list to be entire list
-    boundry = (left_index, right_index)
-    max_sum, boundry = recurse_by_endpoints(list, left_index, right_index, initial_sum, boundry)
-    return max_sum, list[boundry[0]:boundry[1]]
+    result = divide_conq(list, left_index, right_index)
+    return result
 
 '''
 Method for question 2
@@ -22,7 +18,7 @@ def question_2(list, left_index, right_index):
     initial_sum = sum(list[left_index:right_index+1])
     #set initial boundries to be entire list
     initial_boundry = (left_index, right_index)
-    max_sum, boundry = recurse_by_endpoints(list, left_index, right_index, initial_sum, initial_boundry)
+    max_sum, boundry = divide_conq(list, left_index, right_index, initial_sum, initial_boundry)
     #now we have max value and the left and right boundrys
     #next, remove this sublist from the list
     list = replace_sublist(list, boundry)
@@ -74,4 +70,3 @@ if __name__ == '__main__':
 
     result = divide_conq(test_list, 0, len(test_list)-1)
     print(result)
-    #q2_noah(test_list, 0, 9)
