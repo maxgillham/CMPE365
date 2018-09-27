@@ -1,3 +1,5 @@
+import math
+
 
 '''
 Method for question 1.  Pass this method a list and the left and right indicies you want to check for and it will
@@ -26,21 +28,32 @@ def question_2(list, left_index, right_index):
     list = replace_sublist(list, boundry)
     #now we can repeat
     return
-'''
-This method is very simaler to the one above.  Only difference is it returns the left and right endpoints for when 
-removing the sublist in question 2
-'''
-def recurse_by_endpoints(list, left_index, right_index, current_greatest, boundary):
-    if right_index > left_index:
-        for i in range(len(list[left_index:right_index+1])):
-            temp_sum = sum(list[left_index+i:right_index+1])
-            if temp_sum > current_greatest:
-                current_greatest = temp_sum
-                boundary = (left_index+i, right_index+1)
-            i += 1
-        return recurse_by_endpoints(list, left_index, right_index - 1, current_greatest, boundary)
-    else:
-        return current_greatest, boundary
+
+
+def divide_conq(list, left_index, right_index):
+    if left_index == right_index:
+        return list[left_index]
+    median = math.floor((left_index + right_index)/2)
+    left_child = divide_conq(list, left_index, median)
+    right_child = divide_conq(list, median+1, right_index)
+
+    left_sum = list[median - 1]
+    right_sum = list[median]
+
+    #initialize left and right sums to be individual values
+    max_left = left_sum
+    max_right = right_sum
+    for i in range(median - left_index - 1):
+        left_sum += list[i]
+        if(left_sum > max_left):
+            max_left = left_sum
+    for i in range(right_index - median - 1):
+        #print('RIGHT SIDE: median ', median, 'right ind ', right_index)
+        right_sum += list[median + i + 1]
+        if(right_sum > max_right):
+            max_right = right_sum
+    sum_middle = max_left + max_right
+    return max(sum_middle, left_child, right_child)
 
 
 def replace_sublist(list, boundry):
@@ -49,9 +62,16 @@ def replace_sublist(list, boundry):
     return list
 
 if __name__ == '__main__':
-    test_list = [-12, -2, 1, -3, 4, -1, 2, 1, -5, 4, -10]
+    #test_list = [-2, 1, -3, 4, -1, 2, 1, -5, 4]
+    test_list = [2, 4, 5, -7, 3, -6, 1, 2]
+    #test_list = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     #max_sum, max_seg = question_1(test_list, left_index=1, right_index=9)
     #print('maximum value: ', max_sum, '\ncorresponding segment: ', max_seg)
 
     #question_2(test_list, left_index=1, right_index=9)
 
+    #recur = [2,3,4,5,6,7,8,9]
+
+    result = divide_conq(test_list, 0, len(test_list)-1)
+    print(result)
+    #q2_noah(test_list, 0, 9)
