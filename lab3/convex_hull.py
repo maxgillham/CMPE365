@@ -22,7 +22,6 @@ def graham_scan(x, y, stack):
     y = y[:index] + y[index+1:]
     #sort by polar cords
     merge_sort_polar(x, y, bottom_point)
-    print(x)
     stack.push((x[0], y[0]))
     stack.push((x[1], y[1]))
     for i in range(3, n-2):
@@ -46,8 +45,8 @@ def merge_sort_polar(x, y, base_point):
         left_y = y[:middle]
         right_y = y[middle:]
 
-        merge_sort_polar(left_x, left_y, base_point)
         merge_sort_polar(right_x, right_y, base_point)
+        merge_sort_polar(left_x, left_y, base_point)
 
         i = 0
         j = 0
@@ -65,22 +64,24 @@ def merge_sort_polar(x, y, base_point):
                 y[k] = right_y[j]
                 j += 1
             k += 1
-        while i < len(left_x):
-            x[k] = left_x[i]
-            y[k] = left_y[i]
-            i += 1
-            k += 1
         while j < len(right_x):
             x[k] = right_x[j]
             y[k] = right_y[j]
             j += 1
             k += 1
-   
+        while i < len(left_x):
+            x[k] = left_x[i]
+            y[k] = left_y[i]
+            i += 1
+            k += 1
 '''
 Compute polar angle in radians
 '''
 def get_polar_angle(x, y, base_point):
-    return math.atan2(y-base_point[1], x-base_point[0])
+    angle = math.degrees(math.atan2(y-base_point[1], x-base_point[0]))
+    if angle < 0:
+        angle += 360
+    return angle
 
 
 '''
@@ -117,10 +118,13 @@ if __name__ == '__main__':
 
     stack = Stack()
     x, y = generate_points_uniform(10)
-    #graham_scan(x, y, stack)
-    #plot_points(x, y)
-    sort(x, y, (-6,0))
-    '''
+    #merge_sort_polar(x, y, (0,-6))
+    #print(x)
+    #plt.scatter(x, y)
+    #plt.scatter(0,-6, marker='>')
+    #plt.show()
+
+    graham_scan(x, y, stack)
     #print(stack.items)
     plt.scatter(x, y, marker='.')
     convex_x = []
@@ -132,4 +136,3 @@ if __name__ == '__main__':
     plt.scatter(convex_x, convex_y, marker='>')
 
     plt.show()
-    '''
