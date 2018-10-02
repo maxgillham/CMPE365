@@ -2,8 +2,58 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 
+from statistics import mean
+
 '''
-Want x values to be decending
+This method produces the neccesary computation for question 1
+'''
+def question_1():
+    number_of_points = []
+    size_of_hull = []
+    ratio = []
+    for i in range(3, 500):
+        number_of_points.append(i)
+        stack = Stack()
+        x, y = generate_points_uniform(i)
+        graham_scan(x, y, stack)
+        hull_verticies = stack.items
+        size_of_hull.append(hull_area(hull_verticies))
+        ratio.append(hull_area(hull_verticies)/i)
+    plt.subplot(121)
+    plt.scatter(number_of_points, size_of_hull, marker='.')
+    title = 'Area of Convex Hull for Uniform Points'
+    plt.title(title)
+    plt.xlabel('Number of Points')
+    plt.ylabel('Area of Convex Hull')
+    return
+
+'''
+This method performs the necessary computation for question 2
+'''
+def question_2():
+    number_of_points = []
+    size_of_hull = []
+    ratio = []
+    for i in range(3, 500):
+        number_of_points.append(i)
+        stack = Stack()
+        x, y = generate_points_normal(i)
+        graham_scan(x, y, stack)
+        hull_verticies = stack.items
+        size_of_hull.append(hull_area(hull_verticies))
+        ratio.append(hull_area(hull_verticies)/i)
+    plt.subplot(122)
+    plt.scatter(number_of_points, size_of_hull, marker='.')
+    title = 'Area of Convex Hull for Normal Points'
+    plt.title(title)
+    plt.xlabel('Number of Points')
+    plt.ylabel('Area of Convex Hull')
+    plt.show()
+    return
+
+'''
+Performs Graham Scan to caluclate the convex hull, after running
+the verticies of the hull are in the stack.
 '''
 def graham_scan(x, y, stack):
     #number of points
@@ -67,10 +117,13 @@ def hull_area(cords):
     area = abs(area) / 2
     return area
 '''
-Generate set of size n points of uniform distribution centered about the origin
+Generate set of size n points of uniform distribution or guassian centered about the origin
 '''
 def generate_points_uniform(n):
     return np.random.uniform(-5, 5, n).tolist(), np.random.uniform(-5, 5, n).tolist()
+
+def generate_points_normal(n):
+    return np.random.normal( 0, 100/12, n).tolist(), np.random.normal(0,100/12, n).tolist()
 
 '''
 Plot points and convex hull around it
@@ -110,12 +163,7 @@ class Stack:
     def pop(self):
         return self.items.pop()
 
-if __name__ == '__main__':
-    stack = Stack()
-    x, y = generate_points_uniform(5)
-    graham_scan(x, y, stack)
-    points = stack.items
-    area = hull_area(points)
-    print(area)
-    plot_points(x, y)
 
+if __name__ == '__main__':
+    question_1()
+    question_2()
