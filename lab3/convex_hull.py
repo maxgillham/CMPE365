@@ -28,9 +28,9 @@ def graham_scan(x, y, stack):
     for i in range(2, n-1):
         while(get_polar_angle(stack.items[top][0], stack.items[top][1], stack.items[top-1]) > get_polar_angle(x[i], y[i], stack.items[top])):
             stack.pop()
-            top -=1
+            top -= 1
         stack.push((x[i], y[i]))
-        top+=1
+        top += 1
     return
 
 
@@ -57,6 +57,15 @@ def get_polar_angle(x, y, base_point):
         angle += 360
     return angle
 
+def hull_area(cords):
+    n = len(cords)
+    area = 0
+    for i in range(len(cords)):
+        j = (i + 1) % n
+        area += cords[i][0]*cords[j][1]
+        area -= cords[j][0]*cords[i][1]
+    area = abs(area) / 2
+    return area
 '''
 Generate set of size n points of uniform distribution centered about the origin
 '''
@@ -103,7 +112,10 @@ class Stack:
 
 if __name__ == '__main__':
     stack = Stack()
-    x, y = generate_points_uniform(100)
+    x, y = generate_points_uniform(5)
     graham_scan(x, y, stack)
+    points = stack.items
+    area = hull_area(points)
+    print(area)
     plot_points(x, y)
 
