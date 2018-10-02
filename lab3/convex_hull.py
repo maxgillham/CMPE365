@@ -24,15 +24,13 @@ def graham_scan(x, y, stack):
     x, y = sort_polar(x, y, bottom_point)
     stack.push((x[0], y[0]))
     stack.push((x[1], y[1]))
+    top = 2
     for i in range(2, n-1):
-        print('comparing point ', x[i-1], y[i-1], '\n with ', x[i], y[i])
-        top = len(stack.items) - 1
-        angle_1 = get_polar_angle(stack.items[top][0], stack.items[top][1], stack.items[top-1])
-        angle_2 = get_polar_angle(x[i], y[i], stack.items[top])
-        print(angle_1, angle_2)
-        if(angle_1 > angle_2):
+        while(get_polar_angle(stack.items[top][0], stack.items[top][1], stack.items[top-1]) > get_polar_angle(x[i], y[i], stack.items[top])):
             stack.pop()
+            top -=1
         stack.push((x[i], y[i]))
+        top+=1
     return
 
 
@@ -66,10 +64,24 @@ def generate_points_uniform(n):
     return np.random.uniform(-5, 5, n).tolist(), np.random.uniform(-5, 5, n).tolist()
 
 '''
-Plot points
+Plot points and convex hull around it
 '''
 def plot_points(x, y):
+    top =len(stack.items)
     plt.scatter(x, y, marker='.', c='g')
+    convex_x = []
+    convex_y = []
+    for i in range(top):
+        convex_x.append(stack.items[i][0])
+        convex_y.append(stack.items[i][1])
+    plt.plot(convex_x, convex_y, linestyle='-', marker='o', c='b')
+    end_point_x = []
+    end_point_y =[]
+    end_point_x.append(convex_x[top-1])
+    end_point_x.append(convex_x[0])
+    end_point_y.append(convex_y[top-1])
+    end_point_y.append(convex_y[0])
+    plt.plot(end_point_x, end_point_y, linestyle='-', marker='o', c='b')
     plt.show()
     return
 
@@ -90,19 +102,8 @@ class Stack:
         return self.items.pop()
 
 if __name__ == '__main__':
-
     stack = Stack()
-    x, y = generate_points_uniform(10)
+    x, y = generate_points_uniform(100)
     graham_scan(x, y, stack)
-
-    plt.scatter(x, y, marker='.')
-    convex_x = []
-    convex_y = []
-    for i in range(len(stack.items)):
-        convex_x.append(stack.items[i][0])
-        convex_y.append(stack.items[i][1])
-    print(convex_x[0:2], convex_y[0:2])
-    plt.scatter(convex_x, convex_y, marker='>')
-
-    plt.show()
+    plot_points(x, y)
 
