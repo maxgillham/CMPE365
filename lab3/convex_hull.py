@@ -21,59 +21,33 @@ def graham_scan(x, y, stack):
     x = x[:index] + x[index+1:]
     y = y[:index] + y[index+1:]
     #sort by polar cords
-    merge_sort_polar(x, y, bottom_point)
+    x, y = sort_polar(x, y, bottom_point)
     stack.push((x[0], y[0]))
     stack.push((x[1], y[1]))
-    for i in range(3, n-2):
-        top = len(stack.items)
-        angle_1 = get_polar_angle(stack.items[top-1][0], stack.items[top-1][1], stack.items[top-2])
-        angle_2 = get_polar_angle(x[i], y[i], stack.items[top-1])
-        if(angle_1 > angle_2):
+    top = 2
+    for i in range(2, n-1):
+        while(get_polar_angle(stack.items[top][0], stack.items[top][1], stack.items[top-1]) > get_polar_angle(x[i], y[i], stack.items[top])):
             stack.pop()
+            top -=1
         stack.push((x[i], y[i]))
-    return stack
+        top+=1
+    return
+
 
 '''
-Sort by polar angle of points with respect to the base point
+Sort points by polar angle with respect to given base point
 '''
-def merge_sort_polar(x, y, base_point):
-    if len(x) > 1:
+def sort_polar(x, y, base_point):
+    angle_index = []
+    new_order = []
+    for i in range(len(x)):
+        angle_index.append((i, get_polar_angle(x[i], y[i], base_point)))
+    angle_index = sorted(angle_index, key=lambda p: p[1])
+    for j in range(len(angle_index)):
+        new_order.append(angle_index[j][0])
 
-        middle = len(x)//2
-        left_x = x[:middle]
-        right_x = x[middle:]
-        left_y = y[:middle]
-        right_y = y[middle:]
+    return [x[k] for k in new_order], [y[l] for l in new_order]
 
-        merge_sort_polar(right_x, right_y, base_point)
-        merge_sort_polar(left_x, left_y, base_point)
-
-        i = 0
-        j = 0
-        k = 0
-
-        while i < len(left_x) and j < len(right_x):
-            left_angle = get_polar_angle(left_x[i], left_y[i], base_point)
-            right_angle = get_polar_angle(right_x[i], right_y[i], base_point)
-            if left_angle < right_angle:
-                x[k] = left_x[i]
-                y[k] = left_y[i]
-                i += 1
-            else:
-                x[k] = right_x[j]
-                y[k] = right_y[j]
-                j += 1
-            k += 1
-        while j < len(right_x):
-            x[k] = right_x[j]
-            y[k] = right_y[j]
-            j += 1
-            k += 1
-        while i < len(left_x):
-            x[k] = left_x[i]
-            y[k] = left_y[i]
-            i += 1
-            k += 1
 '''
 Compute polar angle in radians
 '''
@@ -83,7 +57,6 @@ def get_polar_angle(x, y, base_point):
         angle += 360
     return angle
 
-
 '''
 Generate set of size n points of uniform distribution centered about the origin
 '''
@@ -91,10 +64,24 @@ def generate_points_uniform(n):
     return np.random.uniform(-5, 5, n).tolist(), np.random.uniform(-5, 5, n).tolist()
 
 '''
-Plot points
+Plot points and convex hull around it
 '''
 def plot_points(x, y):
+    top =len(stack.items)
     plt.scatter(x, y, marker='.', c='g')
+    convex_x = []
+    convex_y = []
+    for i in range(top):
+        convex_x.append(stack.items[i][0])
+        convex_y.append(stack.items[i][1])
+    plt.plot(convex_x, convex_y, linestyle='-', marker='o', c='b')
+    end_point_x = []
+    end_point_y =[]
+    end_point_x.append(convex_x[top-1])
+    end_point_x.append(convex_x[0])
+    end_point_y.append(convex_y[top-1])
+    end_point_y.append(convex_y[0])
+    plt.plot(end_point_x, end_point_y, linestyle='-', marker='o', c='b')
     plt.show()
     return
 
@@ -115,24 +102,8 @@ class Stack:
         return self.items.pop()
 
 if __name__ == '__main__':
-
     stack = Stack()
-    x, y = generate_points_uniform(10)
-    #merge_sort_polar(x, y, (0,-6))
-    #print(x)
-    #plt.scatter(x, y)
-    #plt.scatter(0,-6, marker='>')
-    #plt.show()
-
+    x, y = generate_points_uniform(100)
     graham_scan(x, y, stack)
-    #print(stack.items)
-    plt.scatter(x, y, marker='.')
-    convex_x = []
-    convex_y = []
-    for i in range(len(stack.items)):
-        convex_x.append(stack.items[i][0])
-        convex_y.append(stack.items[i][1])
-    #print(convex_x[0:2], convex_y[0:2])
-    plt.scatter(convex_x, convex_y, marker='>')
+    plot_points(x, y)
 
-    plt.show()
