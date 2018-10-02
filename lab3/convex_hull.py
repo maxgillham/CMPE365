@@ -21,59 +21,35 @@ def graham_scan(x, y, stack):
     x = x[:index] + x[index+1:]
     y = y[:index] + y[index+1:]
     #sort by polar cords
-    merge_sort_polar(x, y, bottom_point)
+    x, y = sort_polar(x, y, bottom_point)
     stack.push((x[0], y[0]))
     stack.push((x[1], y[1]))
-    for i in range(3, n-2):
-        top = len(stack.items)
-        angle_1 = get_polar_angle(stack.items[top-1][0], stack.items[top-1][1], stack.items[top-2])
-        angle_2 = get_polar_angle(x[i], y[i], stack.items[top-1])
+    for i in range(2, n-1):
+        print('comparing point ', x[i-1], y[i-1], '\n with ', x[i], y[i])
+        top = len(stack.items) - 1
+        angle_1 = get_polar_angle(stack.items[top][0], stack.items[top][1], stack.items[top-1])
+        angle_2 = get_polar_angle(x[i], y[i], stack.items[top])
+        print(angle_1, angle_2)
         if(angle_1 > angle_2):
             stack.pop()
         stack.push((x[i], y[i]))
-    return stack
+    return
+
 
 '''
-Sort by polar angle of points with respect to the base point
+Sort points by polar angle with respect to given base point
 '''
-def merge_sort_polar(x, y, base_point):
-    if len(x) > 1:
+def sort_polar(x, y, base_point):
+    angle_index = []
+    new_order = []
+    for i in range(len(x)):
+        angle_index.append((i, get_polar_angle(x[i], y[i], base_point)))
+    angle_index = sorted(angle_index, key=lambda p: p[1])
+    for j in range(len(angle_index)):
+        new_order.append(angle_index[j][0])
 
-        middle = len(x)//2
-        left_x = x[:middle]
-        right_x = x[middle:]
-        left_y = y[:middle]
-        right_y = y[middle:]
+    return [x[k] for k in new_order], [y[l] for l in new_order]
 
-        merge_sort_polar(right_x, right_y, base_point)
-        merge_sort_polar(left_x, left_y, base_point)
-
-        i = 0
-        j = 0
-        k = 0
-
-        while i < len(left_x) and j < len(right_x):
-            left_angle = get_polar_angle(left_x[i], left_y[i], base_point)
-            right_angle = get_polar_angle(right_x[i], right_y[i], base_point)
-            if left_angle < right_angle:
-                x[k] = left_x[i]
-                y[k] = left_y[i]
-                i += 1
-            else:
-                x[k] = right_x[j]
-                y[k] = right_y[j]
-                j += 1
-            k += 1
-        while j < len(right_x):
-            x[k] = right_x[j]
-            y[k] = right_y[j]
-            j += 1
-            k += 1
-        while i < len(left_x):
-            x[k] = left_x[i]
-            y[k] = left_y[i]
-            i += 1
-            k += 1
 '''
 Compute polar angle in radians
 '''
@@ -82,7 +58,6 @@ def get_polar_angle(x, y, base_point):
     if angle < 0:
         angle += 360
     return angle
-
 
 '''
 Generate set of size n points of uniform distribution centered about the origin
@@ -118,21 +93,16 @@ if __name__ == '__main__':
 
     stack = Stack()
     x, y = generate_points_uniform(10)
-    #merge_sort_polar(x, y, (0,-6))
-    #print(x)
-    #plt.scatter(x, y)
-    #plt.scatter(0,-6, marker='>')
-    #plt.show()
-
     graham_scan(x, y, stack)
-    #print(stack.items)
+
     plt.scatter(x, y, marker='.')
     convex_x = []
     convex_y = []
     for i in range(len(stack.items)):
         convex_x.append(stack.items[i][0])
         convex_y.append(stack.items[i][1])
-    #print(convex_x[0:2], convex_y[0:2])
+    print(convex_x[0:2], convex_y[0:2])
     plt.scatter(convex_x, convex_y, marker='>')
 
     plt.show()
+
