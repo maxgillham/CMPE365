@@ -11,20 +11,20 @@ def question_1():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 500):
+    for i in range(3, 50):
         number_of_points.append(i)
         stack = Stack()
-        x, y = generate_points_uniform(i)
+        x, y = generate_points_uniform(i, 5)
         graham_scan(x, y, stack)
         hull_verticies = stack.items
-        size_of_hull.append(hull_area(hull_verticies))
-        ratio.append(hull_area(hull_verticies)/i)
+        size_of_hull.append(len(hull_verticies))
+        ratio.append((len(hull_verticies))/i)
     plt.subplot(121)
     plt.scatter(number_of_points, size_of_hull, marker='.')
-    title = 'Area of Convex Hull for Uniform Points'
+    title = 'Size of Convex Hull for Uniform Points'
     plt.title(title)
     plt.xlabel('Number of Points')
-    plt.ylabel('Area of Convex Hull')
+    plt.ylabel('Size of Convex Hull')
     return
 
 '''
@@ -34,20 +34,20 @@ def question_2():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 500):
+    for i in range(3, 50):
         number_of_points.append(i)
         stack = Stack()
-        x, y = generate_points_normal(i)
+        x, y = generate_points_normal(i, 5)
         graham_scan(x, y, stack)
         hull_verticies = stack.items
-        size_of_hull.append(hull_area(hull_verticies))
-        ratio.append(hull_area(hull_verticies)/i)
+        size_of_hull.append(len(hull_verticies))
+        ratio.append((len(hull_verticies))/i)
     plt.subplot(122)
     plt.scatter(number_of_points, size_of_hull, marker='.')
-    title = 'Area of Convex Hull for Normal Points'
+    title = 'Size of Convex Hull for Normal Points'
     plt.title(title)
     plt.xlabel('Number of Points')
-    plt.ylabel('Area of Convex Hull')
+    plt.ylabel('Size of Convex Hull')
     plt.show()
     return
 
@@ -55,22 +55,60 @@ def question_2():
 This method performs necessary computation for question 3
 '''
 def question_3():
+    '''
+    #for first set of points
     stack = Stack()
-    x, y = generate_points_uniform(10)
+    x, y = generate_points_uniform(10, 100)
+    plt.scatter(x, y)
     graham_scan(x, y, stack)
     hull_verticies = stack.items
     #unziping, turning list of points into x list and y list
-    hull_x, hull_y = zip(*hull_verticies)
-    #get center if circle
-    x0, y0 = mean(hull_x), mean(hull_y)
-    r = max(np.sqrt((np.array(hull_x) - x0)**2 + (np.array(hull_y) - y0)**2))
-    print(x0, y0)
-    print(r)
+    hull_x_1, hull_y_1 = zip(*hull_verticies)
+    #get center of circle
+    x_center_1, y_center_1 = mean(hull_x_1), mean(hull_y_1)
+    r_1 = max(np.sqrt((np.array(hull_x_1) - x_center_1)**2 + (np.array(hull_y_1) - y_center_1)**2))
 
-    circle = plt.Circle((x0,y0), r, fill=False)
-    plt.gcf().gca().add_artist(circle)
-    plt.xaxis(-5,5)
-    plt.yaxis(-5,5)
+    #for seccond set of points
+    stack = Stack()
+    x, y = generate_points_uniform(5, 10)
+    plt.scatter(x, y)
+    graham_scan(x, y, stack)
+    hull_verticies = stack.items
+    #unzip and turn into lists of x and y cords
+    hull_x_2, hull_y_2 = zip(*hull_verticies)
+    #get center of circle
+    x_center_2, y_center_2 = mean(hull_x_2), mean(hull_y_2)
+    r_2 = max(np.sqrt((np.array(hull_x_2) - x_center_2)**2 + (np.array(hull_y_2) - y_center_2)**2))
+    '''
+
+    r_1 = 2
+    r_2 = 10
+
+    x_center_1 = 1
+    y_center_1 = -1
+
+    x_center_2 = 1
+    y_center_2 = 5
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1,1,1)
+
+    c_1 = plt.Circle((x_center_1, y_center_1), radius=r_1, fill=False)
+
+
+    c_2 = plt.Circle((x_center_2, y_center_2), radius=r_2, fill=False)
+    ax.add_patch(c_1)
+    ax.add_patch(c_2)
+
+    plt.axis('scaled')
+    #now check if they intersect
+
+    #if (r_2 - r_1)**2 <= (x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2 <= (r_2 + r_1)**2:
+        #print('they intersect u cuck')
+
+    if abs(r_2 + r_1) <= ((x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2):
+        print('they intsect u pleb')
+
     plt.show()
     #plot_points(x, y, stack)
     return
@@ -131,23 +169,14 @@ def get_polar_angle(x, y, base_point):
         angle += 360
     return angle
 
-def hull_area(cords):
-    n = len(cords)
-    area = 0
-    for i in range(len(cords)):
-        j = (i + 1) % n
-        area += cords[i][0]*cords[j][1]
-        area -= cords[j][0]*cords[i][1]
-    area = abs(area) / 2
-    return area
 '''
 Generate set of size n points of uniform distribution or guassian centered about the origin
 '''
-def generate_points_uniform(n):
-    return np.random.uniform(-5, 5, n).tolist(), np.random.uniform(-5, 5, n).tolist()
+def generate_points_uniform(n, bound):
+    return np.random.uniform(-bound, bound, n).tolist(), np.random.uniform(-bound, bound, n).tolist()
 
-def generate_points_normal(n):
-    return np.random.normal( 0, 100/12, n).tolist(), np.random.normal(0,100/12, n).tolist()
+def generate_points_normal(n, bound):
+    return np.random.normal(0, ((2*bound)^2)/4, n).tolist(), np.random.normal(0, ((2*bound)^2)/12, n).tolist()
 
 '''
 Plot points and convex hull around it
