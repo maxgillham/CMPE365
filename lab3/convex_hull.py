@@ -52,6 +52,30 @@ def question_2():
     return
 
 '''
+This method performs necessary computation for question 3
+'''
+def question_3():
+    stack = Stack()
+    x, y = generate_points_uniform(10)
+    graham_scan(x, y, stack)
+    hull_verticies = stack.items
+    #unziping, turning list of points into x list and y list
+    hull_x, hull_y = zip(*hull_verticies)
+    #get center if circle
+    x0, y0 = mean(hull_x), mean(hull_y)
+    r = max(np.sqrt((np.array(hull_x) - x0)**2 + (np.array(hull_y) - y0)**2))
+    print(x0, y0)
+    print(r)
+
+    circle = plt.Circle((x0,y0), r, fill=False)
+    plt.gcf().gca().add_artist(circle)
+    plt.xaxis(-5,5)
+    plt.yaxis(-5,5)
+    plt.show()
+    #plot_points(x, y, stack)
+    return
+
+'''
 Performs Graham Scan to caluclate the convex hull, after running
 the verticies of the hull are in the stack.
 '''
@@ -128,7 +152,7 @@ def generate_points_normal(n):
 '''
 Plot points and convex hull around it
 '''
-def plot_points(x, y):
+def plot_points(x, y, stack):
     top =len(stack.items)
     plt.scatter(x, y, marker='.', c='g')
     convex_x = []
@@ -165,5 +189,6 @@ class Stack:
 
 
 if __name__ == '__main__':
-    question_1()
-    question_2()
+    #question_1()
+    #question_2()
+    question_3()
