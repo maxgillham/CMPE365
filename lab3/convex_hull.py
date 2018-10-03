@@ -11,7 +11,7 @@ def question_1():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 50):
+    for i in range(3, 1000):
         number_of_points.append(i)
         stack = Stack()
         x, y = generate_points_uniform(i, 5)
@@ -20,11 +20,12 @@ def question_1():
         size_of_hull.append(len(hull_verticies))
         ratio.append((len(hull_verticies))/i)
     plt.subplot(121)
-    plt.scatter(number_of_points, size_of_hull, marker='.')
-    title = 'Size of Convex Hull for Uniform Points'
+    plt.scatter(number_of_points, ratio, marker='.')
+    title = 'Ratio of Size to # of Points for Uniform Points'
     plt.title(title)
     plt.xlabel('Number of Points')
-    plt.ylabel('Size of Convex Hull')
+    plt.ylabel('Ratio')
+    plt.show()
     return
 
 '''
@@ -34,7 +35,7 @@ def question_2():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 50):
+    for i in range(3, 1000):
         number_of_points.append(i)
         stack = Stack()
         x, y = generate_points_normal(i, 5)
@@ -43,11 +44,11 @@ def question_2():
         size_of_hull.append(len(hull_verticies))
         ratio.append((len(hull_verticies))/i)
     plt.subplot(122)
-    plt.scatter(number_of_points, size_of_hull, marker='.')
-    title = 'Size of Convex Hull for Normal Points'
+    plt.scatter(number_of_points, ratio, marker='.')
+    title = 'Ratio of Size to # of Points for Normal Points'
     plt.title(title)
     plt.xlabel('Number of Points')
-    plt.ylabel('Size of Convex Hull')
+    plt.ylabel('Ratio')
     plt.show()
     return
 
@@ -55,12 +56,15 @@ def question_2():
 This method performs necessary computation for question 3
 '''
 def question_3():
-    '''
+
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1)
+
     #for first set of points
     stack = Stack()
-    x, y = generate_points_uniform(10, 100)
-    plt.scatter(x, y)
+    x, y = generate_points_uniform(50, 40)
     graham_scan(x, y, stack)
+    plot_points(x, y, stack, 'b', 'g')
     hull_verticies = stack.items
     #unziping, turning list of points into x list and y list
     hull_x_1, hull_y_1 = zip(*hull_verticies)
@@ -70,47 +74,26 @@ def question_3():
 
     #for seccond set of points
     stack = Stack()
-    x, y = generate_points_uniform(5, 10)
-    plt.scatter(x, y)
+    x, y = generate_points_uniform(50, 15)
     graham_scan(x, y, stack)
+    plot_points(x, y, stack, 'r', 'k')
     hull_verticies = stack.items
     #unzip and turn into lists of x and y cords
     hull_x_2, hull_y_2 = zip(*hull_verticies)
     #get center of circle
     x_center_2, y_center_2 = mean(hull_x_2), mean(hull_y_2)
     r_2 = max(np.sqrt((np.array(hull_x_2) - x_center_2)**2 + (np.array(hull_y_2) - y_center_2)**2))
-    '''
 
-    r_1 = 2
-    r_2 = 10
-
-    x_center_1 = 1
-    y_center_1 = -1
-
-    x_center_2 = 1
-    y_center_2 = 5
-
-    fig = plt.figure()
-    ax = fig.add_subplot(1,1,1)
-
-    c_1 = plt.Circle((x_center_1, y_center_1), radius=r_1, fill=False)
-
-
-    c_2 = plt.Circle((x_center_2, y_center_2), radius=r_2, fill=False)
+    c_1 = plt.Circle((x_center_1, y_center_1), radius=r_1, color='m', fill=False)
+    c_2 = plt.Circle((x_center_2, y_center_2), radius=r_2, color='c', fill=False)
     ax.add_patch(c_1)
     ax.add_patch(c_2)
-
     plt.axis('scaled')
     #now check if they intersect
 
-    #if (r_2 - r_1)**2 <= (x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2 <= (r_2 + r_1)**2:
-        #print('they intersect u cuck')
-
-    if abs(r_2 + r_1) <= ((x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2):
-        print('they intsect u pleb')
-
+    if abs(r_2 + r_1) >= math.sqrt((x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2):
+        print('they intsect, u pleb')
     plt.show()
-    #plot_points(x, y, stack)
     return
 
 '''
@@ -181,23 +164,22 @@ def generate_points_normal(n, bound):
 '''
 Plot points and convex hull around it
 '''
-def plot_points(x, y, stack):
+def plot_points(x, y, stack, point_color, hull_color):
     top =len(stack.items)
-    plt.scatter(x, y, marker='.', c='g')
+    plt.scatter(x, y, marker='.', c=point_color)
     convex_x = []
     convex_y = []
     for i in range(top):
         convex_x.append(stack.items[i][0])
         convex_y.append(stack.items[i][1])
-    plt.plot(convex_x, convex_y, linestyle='-', marker='o', c='b')
+    plt.plot(convex_x, convex_y, linestyle='-', marker='o', c=hull_color)
     end_point_x = []
     end_point_y =[]
     end_point_x.append(convex_x[top-1])
     end_point_x.append(convex_x[0])
     end_point_y.append(convex_y[top-1])
     end_point_y.append(convex_y[0])
-    plt.plot(end_point_x, end_point_y, linestyle='-', marker='o', c='b')
-    plt.show()
+    plt.plot(end_point_x, end_point_y, linestyle='-', marker='o', c=hull_color)
     return
 
 '''
@@ -218,6 +200,6 @@ class Stack:
 
 
 if __name__ == '__main__':
-    #question_1()
-    #question_2()
+    question_1()
+    question_2()
     question_3()
