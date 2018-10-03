@@ -11,10 +11,10 @@ def question_1():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 1000):
+    for i in range(3, 100):
         number_of_points.append(i)
         stack = Stack()
-        x, y = generate_points_uniform(i, 5)
+        x, y = generate_points_uniform(n=i, center=0, bound=5)
         graham_scan(x, y, stack)
         hull_verticies = stack.items
         size_of_hull.append(len(hull_verticies))
@@ -25,7 +25,7 @@ def question_1():
     plt.title(title)
     plt.xlabel('Number of Points')
     plt.ylabel('Ratio')
-    plt.show()
+    #plt.show()
     return
 
 '''
@@ -35,10 +35,10 @@ def question_2():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 1000):
+    for i in range(3, 100):
         number_of_points.append(i)
         stack = Stack()
-        x, y = generate_points_normal(i, 5)
+        x, y = generate_points_normal(n=i, center=0, bound=5)
         graham_scan(x, y, stack)
         hull_verticies = stack.items
         size_of_hull.append(len(hull_verticies))
@@ -62,7 +62,7 @@ def question_3():
 
     #for first set of points
     stack = Stack()
-    x, y = generate_points_uniform(50, 40)
+    x, y = generate_points_uniform(n=50, center=10, bound=3)
     graham_scan(x, y, stack)
     plot_points(x, y, stack, 'b', 'g')
     hull_verticies = stack.items
@@ -74,7 +74,7 @@ def question_3():
 
     #for seccond set of points
     stack = Stack()
-    x, y = generate_points_uniform(50, 15)
+    x, y = generate_points_uniform(n=50, center=0, bound=5)
     graham_scan(x, y, stack)
     plot_points(x, y, stack, 'r', 'k')
     hull_verticies = stack.items
@@ -84,15 +84,19 @@ def question_3():
     x_center_2, y_center_2 = mean(hull_x_2), mean(hull_y_2)
     r_2 = max(np.sqrt((np.array(hull_x_2) - x_center_2)**2 + (np.array(hull_y_2) - y_center_2)**2))
 
+    #check if they intersext
+    intersection = False
+    if abs(r_2 + r_1) >= math.sqrt((x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2):
+        intersection = True
+        print('Possible intersection')
+
+    #plot circles
     c_1 = plt.Circle((x_center_1, y_center_1), radius=r_1, color='m', fill=False)
     c_2 = plt.Circle((x_center_2, y_center_2), radius=r_2, color='c', fill=False)
     ax.add_patch(c_1)
     ax.add_patch(c_2)
     plt.axis('scaled')
-    #now check if they intersect
-
-    if abs(r_2 + r_1) >= math.sqrt((x_center_2 - x_center_1)**2 + (y_center_2 - y_center_1)**2):
-        print('they intsect, u pleb')
+    plt.title('Possible Intersection = ' + str(intersection))
     plt.show()
     return
 
@@ -155,11 +159,11 @@ def get_polar_angle(x, y, base_point):
 '''
 Generate set of size n points of uniform distribution or guassian centered about the origin
 '''
-def generate_points_uniform(n, bound):
-    return np.random.uniform(-bound, bound, n).tolist(), np.random.uniform(-bound, bound, n).tolist()
+def generate_points_uniform(n, center, bound):
+    return np.random.uniform(center - bound, center + bound, n).tolist(), np.random.uniform(center - bound, center + bound, n).tolist()
 
-def generate_points_normal(n, bound):
-    return np.random.normal(0, ((2*bound)^2)/4, n).tolist(), np.random.normal(0, ((2*bound)^2)/12, n).tolist()
+def generate_points_normal(n, center, bound):
+    return np.random.normal(center, ((2*bound)^2)/4, n).tolist(), np.random.normal(center, ((2*bound)^2)/12, n).tolist()
 
 '''
 Plot points and convex hull around it
