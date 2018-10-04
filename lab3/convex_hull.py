@@ -11,7 +11,7 @@ def question_1():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 100):
+    for i in range(3, 10000):
         number_of_points.append(i)
         stack = Stack()
         x, y = generate_points_uniform(n=i, center=0, bound=5)
@@ -21,10 +21,11 @@ def question_1():
         ratio.append((len(hull_verticies))/i)
     plt.subplot(121)
     plt.scatter(number_of_points, ratio, marker='.')
-    title = 'Ratio of Size to # of Points for Uniform Points'
-    plt.title(title)
-    plt.xlabel('Number of Points')
-    plt.ylabel('Ratio')
+    title = 'Ratio of (Hull Size / Set Size) for Uniform'
+    plt.title(title, fontsize=20)
+    plt.xlabel('Number of Points', fontsize=15)
+    plt.ylabel('Ratio', fontsize=15)
+    print('ratio for uni', mean(ratio))
     #plt.show()
     return
 
@@ -35,7 +36,7 @@ def question_2():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 100):
+    for i in range(3, 10000):
         number_of_points.append(i)
         stack = Stack()
         x, y = generate_points_normal(n=i, center=0, bound=5)
@@ -45,10 +46,11 @@ def question_2():
         ratio.append((len(hull_verticies))/i)
     plt.subplot(122)
     plt.scatter(number_of_points, ratio, marker='.')
-    title = 'Ratio of Size to # of Points for Normal Points'
-    plt.title(title)
-    plt.xlabel('Number of Points')
-    plt.ylabel('Ratio')
+    title = 'Ratio of (Hull Size / Set Size) for Standard'
+    plt.title(title, fontsize=20)
+    plt.xlabel('Number of Points', fontsize=15)
+    plt.ylabel('Ratio', fontsize=15)
+    print('ratio for standard', mean(ratio))
     plt.show()
     return
 
@@ -74,7 +76,7 @@ def question_3():
 
     #for seccond set of points
     stack = Stack()
-    x, y = generate_points_uniform(n=50, center=0, bound=5)
+    x, y = generate_points_uniform(n=50, center=4, bound=5)
     graham_scan(x, y, stack)
     plot_points(x, y, stack, 'r', 'k')
     hull_verticies = stack.items
@@ -204,6 +206,6 @@ class Stack:
 
 
 if __name__ == '__main__':
-    question_1()
-    question_2()
+    #question_1()
+    #question_2()
     question_3()
