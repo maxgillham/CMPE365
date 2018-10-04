@@ -14,16 +14,13 @@ Method for question 2
 '''
 def question_2(list, left_index, right_index):
     #first get the maximal sum as before
-    #set initial sum to be the sum of the entire list
-    initial_sum = sum(list[left_index:right_index+1])
-    #set initial boundries to be entire list
-    initial_boundry = (left_index, right_index)
-    max_sum, boundry = divide_conq(list, left_index, right_index, initial_sum, initial_boundry)
+    max_sum_1, boundry_1 = divide_conq(list, left_index, right_index, (0, 0))
     #now we have max value and the left and right boundrys
     #next, remove this sublist from the list
-    list = replace_sublist(list, boundry)
+    list = replace_sublist(list, boundry_1)
     #now we can repeat
-    return
+    max_sum_2, boundry_2 = divide_conq(list, left_index, right_index, (0, 0))
+    return max_sum_1, boundry_1, max_sum_2, boundry_2
 
 
 def divide_conq(list, left_index, right_index, mss_bounds):
@@ -79,4 +76,5 @@ if __name__ == '__main__':
     print(result)
     print(mss_bounds)
 
-    question_2(test_list, left_index=1, right_index=9)
+    max_1, boundry_1, max_2, boundry_2 = question_2(test_list, left_index=1, right_index=len(test_list) -1)
+    print(max_1, boundry_1,'\n',max_2, boundry_2)

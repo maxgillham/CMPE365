@@ -11,7 +11,7 @@ def question_1():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 10000):
+    for i in range(3, 100):
         number_of_points.append(i)
         stack = Stack()
         x, y = generate_points_uniform(n=i, center=0, bound=5)
@@ -36,7 +36,7 @@ def question_2():
     number_of_points = []
     size_of_hull = []
     ratio = []
-    for i in range(3, 10000):
+    for i in range(3, 100):
         number_of_points.append(i)
         stack = Stack()
         x, y = generate_points_normal(n=i, center=0, bound=5)
@@ -44,7 +44,7 @@ def question_2():
         hull_verticies = stack.items
         size_of_hull.append(len(hull_verticies))
         ratio.append((len(hull_verticies))/i)
-    plt.subplot(122)
+    #plt.subplot(122)
     plt.scatter(number_of_points, ratio, marker='.')
     title = 'Ratio of (Hull Size / Set Size) for Standard'
     plt.title(title, fontsize=20)
@@ -165,7 +165,7 @@ def generate_points_uniform(n, center, bound):
     return np.random.uniform(center - bound, center + bound, n).tolist(), np.random.uniform(center - bound, center + bound, n).tolist()
 
 def generate_points_normal(n, center, bound):
-    return np.random.normal(center, ((2*bound)^2)/4, n).tolist(), np.random.normal(center, ((2*bound)^2)/12, n).tolist()
+    return np.random.normal(center, ((2*bound)^2)/4, n).tolist(), np.random.normal(center, ((2*bound)^2)/4, n).tolist()
 
 '''
 Plot points and convex hull around it
@@ -206,6 +206,15 @@ class Stack:
 
 
 if __name__ == '__main__':
+    #stack = Stack()
+    #x, y = generate_points_normal(50, 0, 5)
+    #graham_scan(x, y, stack)
+    #plot_points(x, y, stack, point_color='k', hull_color='c')
+    #plt.title('Convex Hull for 50 Normal Points', fontsize=20)
+    #plt.xlabel('x', fontsize=15)
+    #plt.ylabel('y', fontsize=15)
+    #plt.show()
+
     #question_1()
-    #question_2()
-    question_3()
+    question_2()
+    #question_3()
