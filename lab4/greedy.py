@@ -1,5 +1,9 @@
 import numpy as np
 import os
+import random
+import matplotlib.pyplot as plt
+
+from mpl_toolkits.mplot3d import Axes3D
 
 path = os.getcwd()
 
@@ -32,6 +36,7 @@ def question_2(max_delay):
     print('Set 1: ', set_1_min, 'terminals required for', num_delays_1, 'delays of up to', max_delay*60, 'Minutes')
     print('Set 2: ', set_2_min, 'terminals required for', num_delays_2, 'delays of up to', max_delay*60, 'Minutes')
     return set_1_min, num_delays_1, set_2_min, num_delays_2
+
 '''
 Find the minimum number of terminals needed to suit all planes arrival and departure times
 '''
@@ -65,7 +70,8 @@ depature by 2 minutes means the amount of time at the airport has decreased).  T
 '''
 def delay_flights(times, max_delay):
     #randomly select flights to encounter a delay
-    flight_status = generate_late_flights(len(times))
+    late_fraction = np.random.uniform(0,1)
+    flight_status = generate_late_flights(late_fraction, len(times))
     for i in range(len(times)):
         #if i'th flight is delayed
         if flight_status[i]:
@@ -97,16 +103,32 @@ def uniform_delay(min_delay, max_delay):
     return np.random.uniform(min_delay, max_delay)
 
 #returns a list of size num_of_flights, where list[i]=True indicates flight[i] is late.
-def generate_late_flights(num_of_flights):
-    return np.random.choice(a=[False, True], size=num_of_flights)
+def generate_late_flights(fraction, num_of_flights):
+    selected_indicies = random.sample(range(0, num_of_flights), int(fraction*num_of_flights))
+    return np.isin(range(0, num_of_flights), selected_indicies)
+
+#def make_plots():
+    #time1, time2 = load_data()
+    #time1 = sort_by_departure(time1)
+    #time2 = sort_by_departure(time2)
+
+    #avg_num_gate = []
+    #allowable_delay = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
+    #for j in allowable_delay:
+        #for i in range(100):
+
+
+
+    #return
 
 if __name__ == '__main__':
-    question_1()
-    question_2(.25)
-    question_2(.5)
-    question_2(.75)
-    question_2(1)
+    #question_1()
+    #question_2(.25)
+    #question_2(.5)
+    #question_2(.75)
+    #question_2(1)
 
+    #make_plots()
 
 
 
