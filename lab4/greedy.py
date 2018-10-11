@@ -28,6 +28,7 @@ def question_2(max_delay):
     #randomly select fraction of flights to be late
     late_fraction = np.random.uniform(0, 1)
     time_set_1, num_delays_1 = delay_flights(times=time1, max_delay=max_delay, late_fraction=late_fraction)
+    late_fraction = np.random.uniform(0, 1)
     time_set_2, num_delays_2 = delay_flights(times=time2, max_delay=max_delay, late_fraction=late_fraction)
     #sort by departure time
     time_set_1 = sort_by_departure(time_set_1)
@@ -35,30 +36,41 @@ def question_2(max_delay):
     #compute minimum number of terminals needed
     set_1_min = greedy_terminal_count(time_set_1)
     set_2_min = greedy_terminal_count(time_set_2)
-    print('Set 1: ', set_1_min, 'terminals required for', num_delays_1, 'delays of up to', max_delay*60, 'Minutes')
+    #print('Set 1: ', set_1_min, 'terminals required for', num_delays_1, 'delays of up to', max_delay*60, 'Minutes')
     print('Set 2: ', set_2_min, 'terminals required for', num_delays_2, 'delays of up to', max_delay*60, 'Minutes')
     return set_1_min, num_delays_1, set_2_min, num_delays_2
 
 '''
-Find the minimum number of terminals needed to suit all planes arrival and departure times
+Find the number of gates required
+'''
+def greedy_terminal_count(times):
+    #minimum gates is 1
+    gate = 1
+    #set overlaps to greedy selection of all times
+    A = greedy_overlap_count(times)
+    #check overlaps of overlapping times
+    while A:
+        gate += 1
+        A = greedy_overlap_count(A)
+    return gate
+
+'''
+Find the number of overlaps given a list
 '''
 def greedy_overlap_count(times):
     k = 0
     A = []
-    for i in range(1, len(times)):
-        if times[i][0] > times[k][1]:
+    size = len(times)
+
+    if size == 1:
+        return A
+
+    for i in range(1, size):
+        if times[i][0] >= times[k][1]:
             k = i
         else:
             A.append(times[i])
     return A
-
-def greedy_terminal_count(times):
-    gate = 0
-    A = greedy_overlap_count(times)
-    while(len(A) > 2):
-        A  = greedy_overlap_count(A)
-        gate += 1
-    return gate
 
 '''
 Adds delays to randomly selected flights.  Delay for arrivals and departures must depend on one another because the 
@@ -103,16 +115,15 @@ def generate_late_flights(fraction, num_of_flights):
     selected_indicies = random.sample(range(0, num_of_flights), int(fraction*num_of_flights))
     return np.isin(range(0, num_of_flights), selected_indicies)
 
-def make_plots():
+def three_d_plots():
 
     num_gate_3d = []
     delay_3d = []
     fraction_3d = []
 
-    allowable_delay = [.1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
-    late_fraction = [.1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
+    allowable_delay = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
+    late_fraction = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
 
-    #for 3d plot
     for j, i in itertools.product(allowable_delay, late_fraction):
         time1, time2 = load_data()
         time1, num_delay = delay_flights(time1, max_delay=j, late_fraction=i)
@@ -122,46 +133,68 @@ def make_plots():
         fraction_3d.append(i)
 
     fig = plt.figure()
-    ax = fig.add_subplot(121, projection='3d')
-    ax.scatter(delay_3d, fraction_3d, num_gate_3d, marker='o')
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(delay_3d, fraction_3d, num_gate_3d, marker='o', c='c')
     ax.set_xlabel('Allowable Delay')
     ax.set_ylabel('Fraction of Late Flights')
     ax.set_zlabel('Number of Gates Required')
+    ax.set_title('Number of Gates Required')
 
     plt.show()
-
-    num_gate_delay = []
-
-    #keeping late fraction to be 50 percent
-    for j in allowable_delay:
-        time1, time2 = load_data()
-        time1, num_delay = delay_flights(time1, max_delay=j, late_fraction=.5)
-        time1 = sort_by_departure(time1)
-        num_gate_delay.append(greedy_terminal_count(time1))
-
-    plt.scatter(allowable_delay, num_gate_delay, marker='o')
-    plt.xlabel('Allowable Delay')
-    plt.ylabel('Number of Gates Required')
-    plt.title('Number of Gates for Allowable Delay, Late Fraction Constant (0.5)')
-    plt.show()
-
-    num_gate_fraction = []
 
     return
 
+def fraction_constant_plot(late_fraction):
+    allowable_delay = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
+    num_gate = []
+
+    for j in allowable_delay:
+        time1, time2 = load_data()
+        time1, num_delay = delay_flights(time1, max_delay=j, late_fraction=late_fraction)
+        time1 = sort_by_departure(time1)
+        num_gate.append(greedy_terminal_count(time1))
+
+    plt.scatter(allowable_delay, num_gate, marker='o', c='c')
+    plt.xlabel('Allowable Delay')
+    plt.ylabel('Number of Gates Required')
+    plt.title('Number of Gates for Late Fraction Constant at  ' + str(late_fraction))
+    plt.show()
+    return
+
+def delay_constant_plot(delay):
+    fraction = [0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1]
+    num_gate = []
+
+    for i in fraction:
+        time1, time2 = load_data()
+        time1, num_delay = delay_flights(time1, max_delay=delay, late_fraction=i)
+        time1 = sort_by_departure(time1)
+        num_gate.append(greedy_terminal_count(time1))
+
+    plt.scatter(fraction, num_gate, marker='o', c='c')
+    plt.xlabel('Fraction of Flights Delayed')
+    plt.ylabel('Number of Gates Required')
+    plt.title('Number of Gates for Allowable Delay Constant at  ' + str(delay) + ' hours')
+    plt.show()
+    return
+
+
 if __name__ == '__main__':
     question_1()
-    #question_2(.25)
-    #question_2(.5)
-    #question_2(.75)
-    #question_2(1)
+    question_2(.25)
+    question_2(.5)
+    question_2(.75)
+    question_2(1)
 
-    #make_plots()
+    fraction_constant_plot(.5)
+    fraction_constant_plot(1)
 
-    #check_for_noah = np.array([[0, 3], [2, 4], [3, 4.5], [2.5, 6]])
-    #check_for_noah = sort_by_departure(check_for_noah)
-    #minimum_noah = greedy_terminal_count(check_for_noah)
-    #print(minimum_noah)
+    delay_constant_plot(.5)
+    delay_constant_plot(1)
+
+    three_d_plots()
+
+
 
 
 
