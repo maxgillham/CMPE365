@@ -42,27 +42,23 @@ def question_2(max_delay):
 '''
 Find the minimum number of terminals needed to suit all planes arrival and departure times
 '''
-def greedy_terminal_count(times):
-    #minimum of 1 terminal needed
-    A = [1]
-    #set overlap count to 0
-    overlap_count = 0
-    #initial flight
+def greedy_overlap_count(times):
     k = 0
+    A = []
     for i in range(1, len(times)):
-        #if plane i arrives after plane k departs
-        if times[i, 0] >= times[k, 1]:
-            #append number of terminals needed
-            #this is equal to number of time intersections + 1
-            A.append(overlap_count + 1)
+        if times[i][0] > times[k][1]:
             k = i
-            overlap_count = 0
-        #if plane i and plane k are at airport together
         else:
-            overlap_count += 1
-    A.append(overlap_count + 1)
-    #the maximum of A is the minimum number of terminals required
-    return max(A)
+            A.append(times[i])
+    return A
+
+def greedy_terminal_count(times):
+    gate = 0
+    A = greedy_overlap_count(times)
+    while(len(A) > 2):
+        A  = greedy_overlap_count(A)
+        gate += 1
+    return gate
 
 '''
 Adds delays to randomly selected flights.  Delay for arrivals and departures must depend on one another because the 
@@ -154,13 +150,13 @@ def make_plots():
     return
 
 if __name__ == '__main__':
-    #question_1()
+    question_1()
     #question_2(.25)
     #question_2(.5)
     #question_2(.75)
     #question_2(1)
 
-    make_plots()
+    #make_plots()
 
     #check_for_noah = np.array([[0, 3], [2, 4], [3, 4.5], [2.5, 6]])
     #check_for_noah = sort_by_departure(check_for_noah)
