@@ -4,26 +4,41 @@ import numpy as np
 def count_wait_times(city_graph, requests):
     #first person doesnt have to wait
     wait_times = [0]
-    #time for driver
-    driver_time = 0
-    for i in range(requests.shape[0]-1):
-        i += 1
-        print(requests[i,1], requests[i,2])
+    #drivers time, assume starts at first request time
+    driver_time = requests[0,0]
+    path = []
+    find_path(city_graph, int(requests[0,1])-1, int(requests[0,2])-1, path)
+    #if path exists, increment time by the amount taken to drop off requestor
+    if path: driver_time += get_path_length(city_graph, path)
+
+    #iterate though the rest of requests after dropping off requestor 0
+    for i in range(1, requests.shape[0]):
+        #find time to get to starting location from previous drop off location
         path = []
-        start_time = requests[i,0]
-        find_path(city_graph, int(requests[i,1]), int(requests[i,2]), path)
+        find_path(city_graph, int(requests[i-1,2])-1, int(requests[i,1])-1, path)
+        #if the path exists
         if path:
             driver_time += get_path_length(city_graph, path)
-            wait_times.append(driver_time-start_time)
+            wait_times.append(driver_time - requests[i,0])
+        print('\n request at time ', requests[i,0], 'driver arrived at ', driver_time)
+        #add time to drop off ith request to driver wait_time
+        path = []
+        find_path(city_graph, int(requests[i,1])-1, int(requests[i,2])-1, path)
+        if path:
+            driver_time += get_path_length(city_graph, path)
+
     return wait_times
 
 '''
 This method finds a path , if one exists , from the starting point to the
-ending point
+ending point.  Note that it currenly finds a path, not necessarily the fastest
+path
 '''
 def find_path(city_graph, start, end, path):
     #check if start and end nodes are in the city graph
     if not end in range(0, city_graph.shape[0]):
+        return None
+    elif not start in range(0, city_graph.shape[0]):
         return None
 
     path.append(start)
@@ -39,7 +54,6 @@ def find_path(city_graph, start, end, path):
     for i in range(city_graph.shape[0]):
         #if we can access node i from start and haven't accessed this node yet
         if i not in path and city_graph[start, i] != 0:
-            print(path)
             new_path = find_path(city_graph, i, end, path)
             if not new_path: return new_path
     return None
@@ -69,10 +83,9 @@ def load_csv(fname):
 
 if __name__ == '__main__':
     #column 0: time stamp, #column 1: start location, #column 2: finish location
-    request = load_csv('requests.csv')
+    requests = load_csv('requests.csv')
     city_graph = load_csv('network.csv')
-    count_wait_times(city_graph, request)
-    print(wait_times)
+    wait_times = count_wait_times(city_graph, requests)
 
 
     #print('\n node 0', city_graph[0])
