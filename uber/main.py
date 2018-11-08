@@ -36,9 +36,11 @@ path
 '''
 def find_path(city_graph, start, end, path):
     #check if start and end nodes are in the city graph
-    if not end in range(0, city_graph.shape[0]):
+    if not end in range(0, city_graph.shape[0]+1):
+        print('fuckj',end)
         return None
-    elif not start in range(0, city_graph.shape[0]):
+    elif not start in range(0, city_graph.shape[0]+1):
+        print(start, end)
         return None
 
     path.append(start)
@@ -79,15 +81,16 @@ def get_path_length(city_graph, path):
 
 #just a csv open to numpy
 def load_csv(fname):
-    return np.loadtxt(open(fname, 'rb'), delimiter=',', skiprows=1)
+    return np.loadtxt(open(fname, 'rb'), delimiter=',')
 
 if __name__ == '__main__':
     #column 0: time stamp, #column 1: start location, #column 2: finish location
     requests = load_csv('requests.csv')
     city_graph = load_csv('network.csv')
-    wait_times = count_wait_times(city_graph, requests)
-
-
+    print('requests shape', requests.shape)
+    print('city graph shape', city_graph.shape)
+    #wait_times = count_wait_times(city_graph, requests)
+    #print(min(requests[:,1]), max(requests[:,2]))
     #print('\n node 0', city_graph[0])
     #print('\n node 2', city_graph[2])
     #print('\n node 4', city_graph[4])
