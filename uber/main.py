@@ -1,7 +1,44 @@
 import os
 import numpy as np
 
-def count_wait_times(city_graph, requests):
+def count_wait_times_two_drivers(city_graph, requests):
+    #first and seccond don't have to wait
+    wait_times = [0,0]
+    #driver one starts are request 0 time
+    driver_one_time = requests[0,0]
+    #driver two strarts at request 1 time
+    driver_two_time = requests[1,0]
+    #cast to int and sub 1 for 0 indexing
+    one_start_location = int(requests[0,1]) -1
+    one_end_location = int(requests[0,2]) -1
+    #same but for driver 2
+    two_start_location = int(requests[1,1]) -1
+    two_end_location = int(requests[1,2]) -1
+    #just get all the shortest paths from every node to every other node at once
+    computed_paths = get_all_shortest_paths(city_graph)
+    #increment driver one and driver two time
+    driver_one_time += computed_paths[one_start_location][one_end_location]
+    driver_two_time += computed_paths[two_start_location][two_end_location]
+    #set previous ending locations for each driver
+    one_prev_end = one_end_location
+    two_prev_end = two_end_location
+    #iterate through requests
+    for requestors in range(2, requests.shape[0]-1):
+        #start and end nodes for requestor i
+        one_request_time = requests[requestor,0]
+        one_start_location = int(requests[requestor,1]) - 1
+        one_end_location = int(requests[requestor, 2]) - 1
+        #start and end nodes for requestor i + 1
+        two_request_time = requests[requestor, 0]
+        two_start_location = int(requests[requestor+1,1]) - 1
+        two_end_location = int(requests[requestor+1,2]) - 1
+        #find who is closer
+
+
+
+    return wait_times
+
+def count_wait_times_single_driver(city_graph, requests):
     #first person doesnt have to wait
     wait_times = [0]
     #drivers time, assume starts at first request time
@@ -49,6 +86,14 @@ def count_wait_times(city_graph, requests):
             #compute and add to our dict
             computed_paths[prev_end_location] = shortest_path(city_graph, prev_end_location)
     return wait_times
+
+def get_all_shortest_paths(city_graph):
+    #dict structure where key is start node
+    computed_paths = {}
+    for i in range(city_graph.shape[0]):
+        computed_paths[i] = shortest_path(city_graph, i)
+    return computed_paths
+
 
 '''
 Uses Dijkstra's algorithm to find the shortest distance to each location node, given
@@ -106,9 +151,7 @@ if __name__ == '__main__':
     #print('requests shape', requests.shape)
     #print('city graph shape', city_graph.shape)
 
-
-    #print(shortest_path(test, 0))
     #print(shortest_path(city_graph, 0))
 
-    wait_times = count_wait_times(city_graph, requests)
-    print(wait_times)
+    wait_times = count_wait_times_single_driver(city_graph, requests)
+    print(sum(wait_times))
