@@ -61,6 +61,42 @@ def find_path(city_graph, start, end, path):
     return None
 
 '''
+I need to use dijkstra's shortest path algo
+'''
+def shortest_path(city_graph, reference_node):
+    #location nodes connected to the reference_node
+    location_nodes = [i for i in range(city_graph.shape[0]) if city_graph[reference_node, i] != 0]
+    # assign neighbor nodes to be of distance None. Represents infinity.
+    unvisited = {location: None for location in location_nodes}
+    #dictionary for neighbors that have been visited
+    visited = {}
+    current_distance = 0
+    unvisited[reference_node] = current_distance
+
+    while unvisited:
+        for neighbor in location_nodes:
+            if neighbor not in unvisited: continue
+            #if neighbor is accesable from the starting location
+            if city_graph[reference_node, neighbor] != 0:
+                if neighbor in unvisited:
+                    temp_distance = current_distance + city_graph[reference_node, neighbor]
+                #if first time reaching node or new distance is shorter than current distance
+                if unvisited[neighbor] is None or unvisited[neighbor] > temp_distance:
+                    #update unvisited table
+                    unvisited[neighbor] = temp_distance
+        visited[reference_node] = current_distance
+        del unvisited[reference_node]
+        if not unvisited: break
+        candidates = [node for node in unvisited.items() if node[1]]
+        reference_node, current_distance = sorted(candidates, key = lambda x: x[1])[0]
+
+
+    print(visited)
+
+
+    return visited
+
+'''
 This method gets the length of a given path in the city graph data
 '''
 def get_path_length(city_graph, path):
@@ -87,11 +123,9 @@ if __name__ == '__main__':
     #column 0: time stamp, #column 1: start location, #column 2: finish location
     requests = load_csv('requests.csv')
     city_graph = load_csv('network.csv')
-    print('requests shape', requests.shape)
-    print('city graph shape', city_graph.shape)
+    #print('requests shape', requests.shape)
+    #print('city graph shape', city_graph.shape)
+
+    shortest_path(city_graph, 0)
+    #print(shortest_path(city_graph, 0)[4])
     #wait_times = count_wait_times(city_graph, requests)
-    #print(min(requests[:,1]), max(requests[:,2]))
-    #print('\n node 0', city_graph[0])
-    #print('\n node 2', city_graph[2])
-    #print('\n node 4', city_graph[4])
-    #print('\n node 6', city_graph[6])
