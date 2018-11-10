@@ -6,114 +6,94 @@ def count_wait_times(city_graph, requests):
     wait_times = [0]
     #drivers time, assume starts at first request time
     driver_time = requests[0,0]
-    path = []
-    find_path(city_graph, int(requests[0,1])-1, int(requests[0,2])-1, path)
-    #if path exists, increment time by the amount taken to drop off requestor
-    if path: driver_time += get_path_length(city_graph, path)
+    #cast to int and subtract 1 because indexing from 0
+    start_location = int(requests[0,1])-1
+    end_location = int(requests[0,2])-1
+    #dictionary of shortest paths to every node from a given reference node
+    computed_paths = {}
+    #get shortest path from initial starting location and add to dictionary
+    #so we don't have to compute it twice
+    computed_paths[start_location] = shortest_path(city_graph, start_location)
+    driver_time += computed_paths[start_location][end_location]
+    #previous ending location to get time to arrive at next requestors start
+    prev_end_location = end_location
+    computed_paths[prev_end_location] = shortest_path(city_graph, start_location)
+    #iterate through requests
+    for requestor in range(1, requests.shape[0]):
+        #start and end nodes for requestor i
+        request_time = requests[requestor, 0]
+        start_location = int(requests[requestor,1]) - 1
+        end_location = int(requests[requestor, 2]) - 1
+        #add time to get to requestor
+        driver_time += computed_paths[prev_end_location][start_location]
+        #if driver was late add lateness to wait_times
+        if driver_time > request_time: wait_times.append(driver_time - request_time)
+        #if driver was early or exactly on time
+        else:
+            #wait time of 0
+            wait_times.append(0)
+            #asssuming driver has to wait for requestor to be ready, then leave
+            #at request time, so driver time is updated to request time
+            driver_time = request_time
 
-    #iterate though the rest of requests after dropping off requestor 0
-    for i in range(1, requests.shape[0]):
-        #find time to get to starting location from previous drop off location
-        path = []
-        find_path(city_graph, int(requests[i-1,2])-1, int(requests[i,1])-1, path)
-        #if the path exists
-        if path:
-            driver_time += get_path_length(city_graph, path)
-            wait_times.append(driver_time - requests[i,0])
-        print('\n request at time ', requests[i,0], 'driver arrived at ', driver_time)
-        #add time to drop off ith request to driver wait_time
-        path = []
-        find_path(city_graph, int(requests[i,1])-1, int(requests[i,2])-1, path)
-        if path:
-            driver_time += get_path_length(city_graph, path)
-
+        #if we haven't computed shortest paths for this reference_node
+        if start_location not in computed_paths:
+            #compute and add to the dictionary
+            computed_paths[start_location] = shortest_path(city_graph, start_location)
+        #add time to drop off ith requestor to end location
+        driver_time += computed_paths[start_location][end_location]
+        #end location becomes prev_end_location
+        prev_end_location = end_location
+        #if we haven't used this node as reference
+        if prev_end_location not in computed_paths:
+            #compute and add to our dict
+            computed_paths[prev_end_location] = shortest_path(city_graph, prev_end_location)
     return wait_times
 
 '''
-This method finds a path , if one exists , from the starting point to the
-ending point.  Note that it currenly finds a path, not necessarily the fastest
-path
-'''
-def find_path(city_graph, start, end, path):
-    #check if start and end nodes are in the city graph
-    if not end in range(0, city_graph.shape[0]+1):
-        print('fuckj',end)
-        return None
-    elif not start in range(0, city_graph.shape[0]+1):
-        print(start, end)
-        return None
-
-    path.append(start)
-    #if starting node is ending node and has a loop in graph, return path
-    if start == end and city_graph[start, end] != 0:
-        return path
-
-    #if we can get to the end from start
-    if city_graph[start,end] != 0:
-        return path.append(end)
-
-    #need to try finding end from a node connected to start
-    for i in range(city_graph.shape[0]):
-        #if we can access node i from start and haven't accessed this node yet
-        if i not in path and city_graph[start, i] != 0:
-            new_path = find_path(city_graph, i, end, path)
-            if not new_path: return new_path
-    return None
-
-'''
-I need to use dijkstra's shortest path algo
+Uses Dijkstra's algorithm to find the shortest distance to each location node, given
+and initial reference node.
 '''
 def shortest_path(city_graph, reference_node):
-    #location nodes connected to the reference_node
-    location_nodes = [i for i in range(city_graph.shape[0]) if city_graph[reference_node, i] != 0]
-    # assign neighbor nodes to be of distance None. Represents infinity.
-    unvisited = {location: None for location in location_nodes}
+    #location nodes are indexed as 0,1,2,...,49
+    location_nodes = range(city_graph.shape[0])
+    # assign neighbor nodes to be of distance None to represent infinity.
+    unvisited = {location: float('inf') for location in location_nodes}
     #dictionary for neighbors that have been visited
     visited = {}
+    #init current distance and unvisited for starting node, always 0
     current_distance = 0
-    unvisited[reference_node] = current_distance
-
+    unvisited[reference_node] = 0
+    #while there exists unvisited nodes
     while unvisited:
         for neighbor in location_nodes:
+            #skip over neighbors that have been completely visited
             if neighbor not in unvisited: continue
-            #if neighbor is accesable from the starting location
+            #check to make sure reference_node to neighbor is accesable
             if city_graph[reference_node, neighbor] != 0:
-                if neighbor in unvisited:
-                    temp_distance = current_distance + city_graph[reference_node, neighbor]
+                #assign temp distance to current distance plus reference to neighbor dist
+                temp_distance = current_distance + city_graph[reference_node, neighbor]
                 #if first time reaching node or new distance is shorter than current distance
-                if unvisited[neighbor] is None or unvisited[neighbor] > temp_distance:
+                if unvisited[neighbor] > temp_distance:
                     #update unvisited table
                     unvisited[neighbor] = temp_distance
+        #move to visited
         visited[reference_node] = current_distance
+        #remove from unvistied nodes
         del unvisited[reference_node]
-        if not unvisited: break
-        candidates = [node for node in unvisited.items() if node[1]]
-        reference_node, current_distance = sorted(candidates, key = lambda x: x[1])[0]
-
-
-    print(visited)
-
-
+        #end case
+        if unvisited:
+            #get the next reference node and distance
+            reference_node, current_distance = get_next_reference_and_dist(unvisited)
     return visited
 
 '''
-This method gets the length of a given path in the city graph data
+Get the next reference node from all unvisited nodes that has been visited at least
+once and has the smallest current weight
 '''
-def get_path_length(city_graph, path):
-    #if a single loop path
-    if len(path) == 1:
-        return city_graph[path[0], path[0]]
-    #initilize distance to zero
-    distance = 0
-    #first node in path
-    prev_node = path[0]
-    #iterate through nodes in the path
-    for node in path[1:]:
-        #increment with distance from previous node to next node in path
-        distance += city_graph[prev_node, node]
-        #assign previous node to current node for next increment
-        prev_node = node
-    return distance
+def get_next_reference_and_dist(unvisited):
+    return sorted([next_ref for next_ref in unvisited.items() if next_ref[1] != float('inf')], key = lambda x: x[1])[0]
+
 
 #just a csv open to numpy
 def load_csv(fname):
@@ -126,6 +106,9 @@ if __name__ == '__main__':
     #print('requests shape', requests.shape)
     #print('city graph shape', city_graph.shape)
 
-    shortest_path(city_graph, 0)
-    #print(shortest_path(city_graph, 0)[4])
-    #wait_times = count_wait_times(city_graph, requests)
+
+    #print(shortest_path(test, 0))
+    #print(shortest_path(city_graph, 0))
+
+    wait_times = count_wait_times(city_graph, requests)
+    print(wait_times)
