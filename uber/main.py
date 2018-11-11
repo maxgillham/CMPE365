@@ -1,6 +1,22 @@
 import os
 import numpy as np
 
+
+'''
+Max Gillham - CMPE 365
+UBER Final Project
+14mfg2@queensu.ca - 10183941
+'''
+
+'''
+This method gets the wait times for two uber drivers at once.  It gets all the shortest
+paths at the start because I am asssuming all of nodes will need to be computed when
+comparing distances to requests for each driver.  Driver 1 starts at request 0 and driver 2
+begins at request 1.  At each iteration in the loop, we consider the ith request and the i+1th
+request.  If driver 1 ends their previous trip closer to the starting location of request i,
+in comparison to driver 2's ending location, driver 1 takes the ith request and driver 2 takes
+the ith+1 trip.  This following for the opposite situation.
+'''
 def count_wait_times_two_drivers(city_graph, requests):
     #first and seccond don't have to wait
     wait_times = [0,0]
@@ -22,22 +38,68 @@ def count_wait_times_two_drivers(city_graph, requests):
     #set previous ending locations for each driver
     one_prev_end = one_end_location
     two_prev_end = two_end_location
-    #iterate through requests
-    for requestors in range(2, requests.shape[0]-1):
+    #iterate through requests by 2.  i.e. 2,4,6,8...
+    for requestor in range(2, requests.shape[0]-2, 2):
         #start and end nodes for requestor i
         one_request_time = requests[requestor,0]
         one_start_location = int(requests[requestor,1]) - 1
         one_end_location = int(requests[requestor, 2]) - 1
         #start and end nodes for requestor i + 1
-        two_request_time = requests[requestor, 0]
+        two_request_time = requests[requestor+1, 0]
         two_start_location = int(requests[requestor+1,1]) - 1
         two_end_location = int(requests[requestor+1,2]) - 1
-        #find who is closer
-
-
-
+        #find who is closer to first request
+        driver_one_distance = computed_paths[one_prev_end][one_start_location]
+        driver_two_distance = computed_paths[two_prev_end][one_start_location]
+        if driver_one_distance < driver_two_distance:
+            #driver 1 takes request 1 and driver 2 takes request 2
+            #increment driver 1 time and driver 2 time
+            driver_one_time += driver_one_distance
+            driver_two_time += computed_paths[two_prev_end][two_start_location]
+            #if driver 1 late, add to wait time, else, add 0
+            if driver_one_time > one_request_time:
+                wait_times.append(driver_one_time - one_request_time)
+            else:
+                wait_times.append(0)
+            #if driver 2 is late, add to wait time, else, add 0
+            if driver_two_time > two_request_time:
+                wait_times.append(driver_two_time - two_request_time)
+            else:
+                wait_times.append(0)
+            #add drop off time for each driver
+            driver_one_time += computed_paths[one_start_location][one_end_location]
+            driver_two_time += computed_paths[two_start_location][two_end_location]
+            #set previous end location_node
+            one_prev_end = one_end_location
+            two_prev_end = two_end_location
+        else:
+            #driver 2 takes request 1 and driver 1 takes request 2
+            #increment driver 1 time and driver 2 time
+            driver_one_time += computed_paths[one_prev_end][two_start_location]
+            driver_two_time += driver_two_distance
+            #if driver 1 late, add wait time, else, add 0
+            if driver_one_time > two_request_time:
+                wait_times.append(driver_one_time - two_request_time)
+            else:
+                wait_times.append(0)
+            #if driver 2 late, add wait time, else, add 0
+            if driver_two_time > one_request_time:
+                wait_times.append(driver_two_time - one_request_time)
+            else:
+                wait_times.append(0)
+            #add drop off tiems
+            driver_one_time += computed_paths[two_start_location][two_end_location]
+            driver_two_time += computed_paths[one_start_location][one_end_location]
+            #set previous end nodes
+            one_prev_end = two_end_location
+            two_prev_end = one_end_location
     return wait_times
 
+'''
+Counting wait times for a single uber driver going through list.  This method checks
+for shortest path calculations to avoid copmuting shortest paths for nodes that are
+not reached.
+'''
 def count_wait_times_single_driver(city_graph, requests):
     #first person doesnt have to wait
     wait_times = [0]
@@ -87,13 +149,15 @@ def count_wait_times_single_driver(city_graph, requests):
             computed_paths[prev_end_location] = shortest_path(city_graph, prev_end_location)
     return wait_times
 
+'''
+This method just gets the shortest path to all other nodes, for each node in the location matrix
+'''
 def get_all_shortest_paths(city_graph):
     #dict structure where key is start node
     computed_paths = {}
     for i in range(city_graph.shape[0]):
         computed_paths[i] = shortest_path(city_graph, i)
     return computed_paths
-
 
 '''
 Uses Dijkstra's algorithm to find the shortest distance to each location node, given
@@ -153,5 +217,9 @@ if __name__ == '__main__':
 
     #print(shortest_path(city_graph, 0))
 
-    wait_times = count_wait_times_single_driver(city_graph, requests)
-    print(sum(wait_times))
+    #wait_times = count_wait_times_single_driver(city_graph, requests)
+    #print(sum(wait_times))
+    #print(get_all_shortest_paths(city_graph))
+
+    less_wait_times = count_wait_times_two_drivers(city_graph, requests)
+    print('hello', less_wait_times)
