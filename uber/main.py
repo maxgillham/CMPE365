@@ -61,11 +61,15 @@ def count_wait_times_two_drivers(city_graph, requests):
                 wait_times.append(driver_one_time - one_request_time)
             else:
                 wait_times.append(0)
+                #driver waits for requestor to be ready
+                driver_one_time = one_request_time
             #if driver 2 is late, add to wait time, else, add 0
             if driver_two_time > two_request_time:
                 wait_times.append(driver_two_time - two_request_time)
             else:
                 wait_times.append(0)
+                #wait for requstor
+                driver_two_time = two_request_time
             #add drop off time for each driver
             driver_one_time += computed_paths[one_start_location][one_end_location]
             driver_two_time += computed_paths[two_start_location][two_end_location]
@@ -82,11 +86,14 @@ def count_wait_times_two_drivers(city_graph, requests):
                 wait_times.append(driver_one_time - two_request_time)
             else:
                 wait_times.append(0)
+                #wait for requesotr
+                driver_one_time = two_request_time
             #if driver 2 late, add wait time, else, add 0
             if driver_two_time > one_request_time:
                 wait_times.append(driver_two_time - one_request_time)
             else:
                 wait_times.append(0)
+                driver_two_time = one_request_time
             #add drop off tiems
             driver_one_time += computed_paths[two_start_location][two_end_location]
             driver_two_time += computed_paths[one_start_location][one_end_location]
@@ -217,9 +224,8 @@ if __name__ == '__main__':
 
     #print(shortest_path(city_graph, 0))
 
-    #wait_times = count_wait_times_single_driver(city_graph, requests)
-    #print(sum(wait_times))
-    #print(get_all_shortest_paths(city_graph))
+    wait_times = count_wait_times_single_driver(city_graph, requests)
+    print(sum(wait_times))
 
     less_wait_times = count_wait_times_two_drivers(city_graph, requests)
-    print('hello', less_wait_times)
+    print(sum(less_wait_times))
