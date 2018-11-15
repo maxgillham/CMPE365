@@ -69,13 +69,13 @@ class Driver:
 #floyd warshall aglorithm to optimize city network
 def floyd_warshall(city_graph):
     V = range(city_graph.shape[0])
-    #initialize tabe so nodes that are unreachable in single step are infinity
+    #initialize table so nodes that are unreachable in single step are infinity, others left
+    #to default weights and (i,i) entries are left at zero with a nested loop
     for row, col in itertools.product(V,V):
         if city_graph[row, col] == 0 and row != col: city_graph[row, col] = float('inf')
-    for k in V:
-        for i in V:
-            for j in V:
-                if city_graph[i,j] > city_graph[i,k] + city_graph[k,j]: city_graph[i,j] = city_graph[i,k] + city_graph[k,j]
+    #3 nested loops to find shorter paths from node to node
+    for k, i, j in itertools.product(V,V,V):
+        if city_graph[i,j] > city_graph[i,k] + city_graph[k,j]: city_graph[i,j] = city_graph[i,k] + city_graph[k,j]
     return city_graph
 
 #just a csv open to numpy
