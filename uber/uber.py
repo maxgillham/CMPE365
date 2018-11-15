@@ -22,6 +22,11 @@ def wait_times(network, requests):
         print('\nDriver 2 Time', driver_2.time, 'At Location', driver_2.location)
         print('With ETA', driver_2.get_eta(pickup_location),'\n')
 
+        #update drivers to time of request if they at prev time
+        #if they are seeing request after its been made, ignore
+        driver_1.update_time(request_time)
+        driver_2.update_time(request_time)
+
         #if driver 1 can arrive at pickup location before driver 2
         if driver_1.get_eta(pickup_location) < driver_2.get_eta(pickup_location):
             driver_1.pickup(pickup_location=pickup_location, request_time=request_time)
@@ -39,7 +44,7 @@ def wait_times(network, requests):
 class Driver:
     def __init__(self, network_map):
         self.location = 0
-        self.time = 10
+        self.time = 0
         self.late_count = 0
         self.map = network_map
 
@@ -54,7 +59,11 @@ class Driver:
         self.location = dropoff_location
 
     def get_eta(self, check_location):
-        return (self.map[self.location][check_location] + self.time)
+        return self.map[self.location][check_location] + self.time
+    
+    def update_time(self, time):
+        if self.time > time: return
+        else: self.time = time
 
 
 #floyd warshall aglorithm to optimize city network
