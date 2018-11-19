@@ -17,9 +17,6 @@ def wait_times_n_drivers(n, network, requests):
     #create a empty array of zeros to initialize eta to next request
     eta = np.zeros(n)
 
-    #empy array for pickup_location frequency count
-    hotspot = np.zeros(network.shape[0])
-
     #loop through all requests
     for i in range(requests.shape[0]):
 
@@ -47,7 +44,6 @@ def wait_times_n_drivers(n, network, requests):
     #count late times for each driver in request
     for i in range(n): total_wait_time += drivers[i].late_count
     #return total wait time
-    print(hotspot)
     return total_wait_time
 
 def wait_times_2_drivers(network, requests):
@@ -165,7 +161,7 @@ def plot_wait_times(city_graph, requests, range_of_drivers):
     plt.scatter(np.arange(1,range_of_drivers), wait_times, marker='o', c='c')
     plt.xlabel('Number of Drivers')
     plt.ylabel('Total Time Spent Waiting')
-    plt.title('Time Spent Waiting for 100 Given Drivers')
+    plt.title('Time Spent Waiting for 100 Given Drivers Initilized Randomly')
     plt.show()
     return
 
@@ -175,14 +171,14 @@ def load_csv(fname):
 
 if __name__ == '__main__':
     #load request data and city_graph
-    requests = load_csv('supplementpickups.csv')
-    #requests = load_csv('requests.csv')
+    #requests = load_csv('supplementpickups.csv')
+    requests = load_csv('requests.csv')
     city_graph = load_csv('network.csv')
 
     #optimize city graph
     city_graph = floyd_warshall(city_graph)
 
-    #plot_wait_times(city_graph, requests, 100)
-    print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
-    print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
-    print('late count for 10 drivers', wait_times_n_drivers(10,city_graph, requests))
+    plot_wait_times(city_graph, requests, 100)
+    #print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
+    #print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
+    #print('late count for 10 drivers', wait_times_n_drivers(10,city_graph, requests))
