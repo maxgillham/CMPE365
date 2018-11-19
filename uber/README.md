@@ -52,8 +52,9 @@ update_time(time)
     else
         return
 ```
-
-These methods of a driver class provide the functionality to appropriotly dispatch drivers for requests.  Below is the outline of distributing drivers to any given request in the request data file.
+These methods of a driver class provide the functionality to appropriotly dispatch drivers for requests. First consider all drivers starting at location node 1, and then we will consider having drivers start the day with various distributions of the map.
+### All Drivers Starting At Same Location
+Below is the outline of distributing drivers to any given request in the request data file. Here, drivers always begin at location node 1. 
 
 ```
 def wait_times(network, requests)
@@ -81,13 +82,13 @@ def wait_times(network, requests)
     return driver_1.late_count + driver_2.late_count
 ```
 
-Runnning this method with the origonal data yeilds a total waiting time of 618 for two drivers, and a total wait time of 4376 if only one driver is taking requests throughout the day.  Expanding this algorithm to input n drivers is as follows.
+Runnning this method with the origonal data yeilds a total waiting time of 4376 for just one driver and 618 for two drivers requests throughout the day.  Expanding this algorithm to input n drivers is as follows.
 
 ```
 def wait_times_n_drivers(n, network, requests):
 
     total late count to 0
-    create a list of n instances of driver class
+    create a list of n instances of driver class, all starting at location 0
 
     for i from first to last request
         request_time = requests[i,0]
@@ -109,7 +110,6 @@ def wait_times_n_drivers(n, network, requests):
 
 This adjustment alows us to enter a number of n as input to counting wait times. For the origonal data given, below is a plot of total time requestors spent waiting with respect to the number of drivers taking requests over the day.
 
-
 ![10](./img/10.png)
 
 As you can see, there is a large decrease in time spent waiting for having 1 driver taking requests to 2 requests.  The amount of time then starts to approach a limit.  See below the plot for up to 50 drivers.
@@ -120,4 +120,22 @@ Below is for up to 100 drivers.
 
 ![100](./img/100.png)
 
-The total amount of time spent waiting for requestos approaches a limit of 279.
+The total amount of time spent waiting approaches a limit of 279. This hits a limit as the drivers are all begining at node 0, however, if we change the initial distribution of drivers to span the locations we yeild interesting results.
+
+### Drivers Begining at Different Locations
+Consider instead of initializing all drivers to location 0, we uniformly distributed them along all locations.  This has little to no effect on the wait times when only one driver is used, however, when the number of drivers increases, the time spent waiting will not hit a minumm, but continue converging.  
+First consider wait times for 1 to 10 drivers, where each driver is initalized uniformly across locations.
+
+![10rand](./img/rand_10.png)
+
+Next, consider 1 to 50 drivers.
+
+![50rand](./img/rand_50.png)
+
+And finally, 1 to 100 drivers.
+
+![100rand](./img/rand_100.png)
+
+
+The most significant difference here is when the number of drivers increase, the total time requestors spend waiting decreases, and do not hit a limit.  
+Using this method to initialize drivers, we yeild a total wait time of 
