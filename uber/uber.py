@@ -4,28 +4,36 @@ import itertools
 import matplotlib.pyplot as plt
 
 def wait_times_n_drivers(n, network, requests):
-    
+
     #init wait count for all drivers to be zero
     total_wait_time = 0
     #create a list of instances of driver class
     drivers = []
     #create n instances of drivers
     for i in range(n):
-        drivers.append(Driver(network_map=network))
+        #initialize each to random location node
+        drivers.append(Driver(starting_location=np.random.choice(50), network_map=network))
+
+    #create a empty array of zeros to initialize eta to next request
+    eta = np.zeros(n)
+
+    #empy array for pickup_location frequency count
+    hotspot = np.zeros(network.shape[0])
 
     #loop through all requests
     for i in range(requests.shape[0]):
-        
+
         #set request variables for ease of use
         request_time = requests[i,0]
         pickup_location = int(requests[i,1])-1
         dropoff_location = int(requests[i,2])-1
 
+        #increment request to pickup_location counter
+        hotspot[pickup_location] += 1
+
         #update time to request time for all drivers
         for i in range(n): drivers[i].update_time(request_time)
-        
-        #create a empty array of zeros
-        eta = np.zeros(n)
+
         #update driver eta to pickup for each driver
         for i in range(n): eta[i] = drivers[i].get_eta(pickup_location)
 
@@ -39,12 +47,13 @@ def wait_times_n_drivers(n, network, requests):
     #count late times for each driver in request
     for i in range(n): total_wait_time += drivers[i].late_count
     #return total wait time
+    print(hotspot)
     return total_wait_time
 
 def wait_times_2_drivers(network, requests):
     #init 2 drivers starting at location 0 at time of first request
-    driver_1 = Driver(network_map=network)
-    driver_2 = Driver(network_map=network)
+    driver_1 = Driver(starting_location=0, network_map=network)
+    driver_2 = Driver(starting_location=0, network_map=network)
 
     #loop through requests
     for i in range(requests.shape[0]):
@@ -72,9 +81,9 @@ def wait_times_2_drivers(network, requests):
     return driver_1.late_count + driver_2.late_count
 
 def wait_times_1_driver(network, requests):
-    
+
     #create instance of driver class
-    driver = Driver(network_map=network)
+    driver = Driver(starting_location=0, network_map=network)
 
     #iterate through all requests
     for i in range(requests.shape[0]):
@@ -91,35 +100,49 @@ def wait_times_1_driver(network, requests):
         driver.pickup(pickup_location, request_time)
         #dropoff requestor
         driver.dropoff(dropoff_location)
-    
+
     #return late count for single driver
     return driver.late_count
 
 
 #driver class
 class Driver:
-    def __init__(self, network_map):
-        self.location = 0
+    #driver has variables location, time, late_count
+    def __init__(self, starting_location, network_map):
+        self.location = starting_location
         self.time = 0
         self.late_count = 0
         self.map = network_map
 
+    #this method updates driver time, location and increments late_count if late
     def pickup(self, pickup_location, request_time):
         self.time += self.map[self.location][pickup_location]
         self.location = pickup_location
         if self.time > request_time: self.late_count += (self.time - request_time)
         else: self.time = request_time
 
+    #this method increments time and location for a dropoff
     def dropoff(self, dropoff_location):
         self.time += self.map[self.location][dropoff_location]
         self.location = dropoff_location
 
+    #this method gets time of arrival if driver goes to location
     def get_eta(self, check_location):
         return self.map[self.location][check_location] + self.time
-    
+
+    #this method updates time of driver to time of request unless driver currently
+    #on trip
     def update_time(self, time):
         if self.time > time: return
         else: self.time = time
+
+    #if a driver isn't chosen to pickup a requestor and not currently on a trip
+    #update time and location to some given wait location
+    def wait(self, time, wait_location):
+        if self.time > time: return
+        else:
+            self.time += self.map[self.location][wait_location]
+            self.location = wait_location
 
 
 #floyd warshall aglorithm to optimize city network
@@ -148,18 +171,18 @@ def plot_wait_times(city_graph, requests, range_of_drivers):
 
 #just a csv open to numpy
 def load_csv(fname):
-    return np.loadtxt(open(fname, 'rb'), delimiter=',')
-
-
+    return np.genfromtxt(fname, delimiter=',')
 
 if __name__ == '__main__':
     #load request data and city_graph
     requests = load_csv('supplementpickups.csv')
+    #requests = load_csv('requests.csv')
     city_graph = load_csv('network.csv')
 
     #optimize city graph
     city_graph = floyd_warshall(city_graph)
 
     #plot_wait_times(city_graph, requests, 100)
-    late_count = wait_times_n_drivers(10,city_graph, requests)
-    print(late_count)
+    print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
+    print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
+    print('late count for 10 drivers', wait_times_n_drivers(10,city_graph, requests))
