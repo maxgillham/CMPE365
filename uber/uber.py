@@ -154,7 +154,7 @@ def load_csv(fname):
 
 if __name__ == '__main__':
     #load request data and city_graph
-    requests = load_csv('requests.csv')
+    requests = load_csv('supplementpickups.csv')
     city_graph = load_csv('network.csv')
 
     #optimize city graph
