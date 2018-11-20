@@ -26,7 +26,7 @@ def wait_times_n_drivers(n, network, requests):
         dropoff_location = int(requests[i,2])-1
 
         #increment request to pickup_location counter
-        hotspot[pickup_location] += 1
+        #hotspot[pickup_location] += 1
 
         #update time to request time for all drivers
         for i in range(n): drivers[i].update_time(request_time)
@@ -178,7 +178,10 @@ if __name__ == '__main__':
     #optimize city graph
     city_graph = floyd_warshall(city_graph)
 
-    plot_wait_times(city_graph, requests, 100)
+    print(sum(city_graph[0,:]))
+    print(sum(city_graph[1,:]))
+    print(sum(city_graph[2,:]))
+    #plot_wait_times(city_graph, requests, 100)
     #print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
     #print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
-    #print('late count for 10 drivers', wait_times_n_drivers(10,city_graph, requests))
+    #print('late count for 10 drivers', wait_times_n_drivers(50,city_graph, requests))
