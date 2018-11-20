@@ -169,6 +169,12 @@ def plot_wait_times(city_graph, requests, range_of_drivers):
 def load_csv(fname):
     return np.genfromtxt(fname, delimiter=',')
 
+#sort locations by sum of distances to all other locations
+def sort_by_centrality(city_graph):
+    locations = range(50)
+    return sorted(locations, key=lambda x: sum(city_graph[x]))
+
+
 if __name__ == '__main__':
     #load request data and city_graph
     #requests = load_csv('supplementpickups.csv')
@@ -178,9 +184,7 @@ if __name__ == '__main__':
     #optimize city graph
     city_graph = floyd_warshall(city_graph)
 
-    print(sum(city_graph[0,:]))
-    print(sum(city_graph[1,:]))
-    print(sum(city_graph[2,:]))
+    print(sort_by_centrality(city_graph))
     #plot_wait_times(city_graph, requests, 100)
     #print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
     #print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
