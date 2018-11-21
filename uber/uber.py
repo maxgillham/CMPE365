@@ -4,16 +4,17 @@ import itertools
 import matplotlib.pyplot as plt
 
 def wait_times_n_drivers(n, network, requests):
-
     #init wait count for all drivers to be zero
     total_wait_time = 0
     #create a list of instances of driver class
     drivers = []
+    starting_locations = sort_by_centrality(network)
     #create n instances of drivers
     for i in range(n):
-        #initialize each to random location node
-        drivers.append(Driver(starting_location=np.random.choice(50), network_map=network))
-
+        #initialize each to node 0
+        #drivers.append(Driver(starting_location=0, network_map=network))
+        #initialize each driver in order of most central to least central nodes
+        drivers.append(Driver(starting_location=starting_locations[i%50], network_map=network))
     #create a empty array of zeros to initialize eta to next request
     eta = np.zeros(n)
 
@@ -24,9 +25,6 @@ def wait_times_n_drivers(n, network, requests):
         request_time = requests[i,0]
         pickup_location = int(requests[i,1])-1
         dropoff_location = int(requests[i,2])-1
-
-        #increment request to pickup_location counter
-        #hotspot[pickup_location] += 1
 
         #update time to request time for all drivers
         for i in range(n): drivers[i].update_time(request_time)
@@ -77,7 +75,6 @@ def wait_times_2_drivers(network, requests):
     return driver_1.late_count + driver_2.late_count
 
 def wait_times_1_driver(network, requests):
-
     #create instance of driver class
     driver = Driver(starting_location=0, network_map=network)
 
@@ -153,6 +150,13 @@ def floyd_warshall(city_graph):
         if city_graph[i,j] > city_graph[i,k] + city_graph[k,j]: city_graph[i,j] = city_graph[i,k] + city_graph[k,j]
     return city_graph
 
+#sort locations by sum of distances to all other locations
+def sort_by_centrality(city_graph):
+    #create list 0 to 49
+    locations = range(50)
+    #sort list indices by the sum of distances to all other nodes
+    return sorted(locations, key=lambda x: sum(city_graph[x]))
+
 #plotting method
 def plot_wait_times(city_graph, requests, range_of_drivers):
     wait_times = []
@@ -161,7 +165,7 @@ def plot_wait_times(city_graph, requests, range_of_drivers):
     plt.scatter(np.arange(1,range_of_drivers), wait_times, marker='o', c='c')
     plt.xlabel('Number of Drivers')
     plt.ylabel('Total Time Spent Waiting')
-    plt.title('Time Spent Waiting for 100 Given Drivers Initilized Randomly')
+    plt.title('Time Spent Waiting for 100 Given Drivers Initilized In Order Of Centrality')
     plt.show()
     return
 
@@ -169,23 +173,20 @@ def plot_wait_times(city_graph, requests, range_of_drivers):
 def load_csv(fname):
     return np.genfromtxt(fname, delimiter=',')
 
-#sort locations by sum of distances to all other locations
-def sort_by_centrality(city_graph):
-    locations = range(50)
-    return sorted(locations, key=lambda x: sum(city_graph[x]))
-
-
 if __name__ == '__main__':
     #load request data and city_graph
-    #requests = load_csv('supplementpickups.csv')
-    requests = load_csv('requests.csv')
+    requests = load_csv('supplementpickups.csv')
+    #requests = load_csv('requests.csv')
     city_graph = load_csv('network.csv')
 
     #optimize city graph
     city_graph = floyd_warshall(city_graph)
 
-    print(sort_by_centrality(city_graph))
     #plot_wait_times(city_graph, requests, 100)
-    #print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
-    #print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
-    #print('late count for 10 drivers', wait_times_n_drivers(50,city_graph, requests))
+
+    print('late_count for 1 driver', wait_times_1_driver(city_graph, requests))
+    print('late count for 2 drivers', wait_times_2_drivers(city_graph, requests))
+    print('late count for 2 drivers', wait_times_n_drivers(2,city_graph, requests))
+    print('late count for 10 drivers', wait_times_n_drivers(10,city_graph, requests))
+    print('late count for 50 drivers', wait_times_n_drivers(50,city_graph, requests))
+    print('late count for 100 drivers', wait_times_n_drivers(100,city_graph, requests))
