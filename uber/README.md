@@ -116,19 +116,39 @@ As you can see, there is a large decrease in time spent waiting for having 1 dri
 The total amount of time spent waiting approaches a limit of 279. This hits a limit as the drivers are all beginning at node 0, however, if we change the initial distribution of drivers to span the locations, we can avoid some of these cases where drivers are late.
 
 ### Drivers Beginning at Different Locations
-Consider instead of initializing all drivers to location 0, we uniformly distributed them along all locations.  This has little to no effect on the wait times when only one driver is used, however, when the number of drivers increases, the time spent waiting will not hit a minimum, but will converge to zero.  
-First consider wait times for 1 to 10 drivers, where each driver is initialized uniformly across locations.
+Consider instead of initializing all drivers to location 0, we distribute them across locations sorted by their level of centrality. To do this, I created a method that sorts locations 1 to 50 by the total amount of time taken to arrive at all other nodes. Therefore, the most central nodes are at the beginning of the list, and in turn, the cars are initialed to start at these locations. This has little effect on the wait time when only one driver is used (decreased by 3), however, when the number of drivers increases, the time spent waiting will not hit a minimum, but will converge to zero.  
+First consider wait times for 1 to 10 drivers, where each driver 1 begins at the most central node, driver 2 at the second most central node and so on.
 
 ![10rand](./img/rand_10.png)
 
-There isn't a very large noticeable difference until we consider more drivers.
+There difference becomes more noticeable when we consider more drivers.
 
 ![50rand](./img/rand_50.png)
 
-When there is more drivers available, the probability of a requester having a zero wait time increases, as there is a greater chance that a driver is initialized at the requesters pickup location and simply waits until that request comes in. See below for up to 100 drivers.
+When there are drivers available, the probability of a requester having a zero wait time increases, as there is a greater chance that a driver is initialized at the requesters pickup location and simply waits until that request comes in. See below for up to 100 drivers.
 
 ![100rand](./img/rand_100.png)
 
 
 The most significant difference here is when the number of drivers increase, the total time requesters spend waiting decreases, and do not hit a limit.  
-Using this method to initialize drivers, we yield a total wait time of 70 for 100 drivers, as opposed to the previous wait time of 279 when all drivers were initialized to the same location.
+Using this method to initialize drivers, we yield a total wait time of 60 for 100 drivers, as opposed to the previous wait time of 279 when all drivers were initialized to the same location. As the number of drivers increases, the time spent waiting will converge to 0.
+
+## Results
+
+Below is a table of the time spent waiting for the original request data given with respect to the number of drivers and location initialization method used.
+
+|            | All Drivers Starting at Node 0 | Drivers Starting in Order of Centrality |
+|-----------:|---------:|----------|
+|  2 Drivers |     618  |     616|   
+| 10 Drivers |       307|      284|  
+| 50 Drivers |      279 |       130|   
+| 100 Drivers|       279|       60|  
+
+And below are my results with the more complex request set given in week 10
+
+|            | All Drivers Starting at Node 0 | Drivers Starting in Order of Centrality |
+|-----------:|---------:|----------|
+|  2 Drivers |     615  |     610|   
+| 10 Drivers |       306|      276|  
+| 50 Drivers |      306 |       113|   
+| 100 Drivers|       306|       54|  
