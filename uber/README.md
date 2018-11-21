@@ -152,3 +152,7 @@ And below are my results with the more complex request set given in week 10
 | 10 Drivers |       306|      276|  
 | 50 Drivers |      306 |       113|   
 | 100 Drivers|       306|       54|  
+
+
+## Conclusion
+In conclusion, my code implements the Floyd Warshall algorithm to optimize the graph because we require a list of shortest paths to each location, from each location.  The best way to optimize the ubers I have found, is to initialize them in such a way that they are distributed amongst the more central locations.
